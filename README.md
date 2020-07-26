@@ -1,5 +1,5 @@
 # method_stock_indicators
-包含各种股票技术指标的计算方法
+包含各种股票技术指标的计算方法，不定时更新
 
 ### MA(series,n)
 关于series的n日移动平均
