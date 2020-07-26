@@ -68,6 +68,9 @@ def SAR(price_high, price_low, price_close, n=4, af=0.04, step=0.04, extrme=0.2)
     step:   递增动量
     extrem: 最高动量
     '''
+    price_high = price_high.copy().reset_index(drop=True)
+    price_low = price_low.copy().reset_index(drop=True)
+    price_close = price_close.copy().reset_index(drop=True)
     sar = []
     sar_channel_type = []
     af = 0.04
@@ -77,66 +80,78 @@ def SAR(price_high, price_low, price_close, n=4, af=0.04, step=0.04, extrme=0.2)
     sar_channel_type.extend([0 for _ in range(n - 1)])
     # 第n天另行计算
 
-    if price_close[n - 1] > sar[0]:
+    if price_close[n - 1] >= sar[0]:
         sar.append(min(price_low[:n]))
         sar_channel_type.append(1)
-
-        ep = max(price_high[:n])
-
+        ep = price_high[n-1]
         trend = 1
     else:
         sar.append(max(price_high[:n]))
         sar_channel_type.append(-1)
-        ep = min(price_low[:n])
+        ep = price_low[n-1]
         trend = 0
 
     # n天后开始循环计算
-    for i in range(len(sar) - 1, len(price_close) - 1):
+    for i in range(len(sar), len(price_close)):
         if trend == 1:  # 上升通道
-            last_sar = sar[i]
-            if last_sar > price_low[i]:  # 最低价下穿通道底部，下一个循环进入下降通道
+            last_sar = sar[i-1]
+            if last_sar >= price_low[i]:  # 最低价下穿通道底部，下一个循环进入下降通道
                 af = 0.04
-                sar.append(max(price_high[i - n + 1:i + 1]))
+                if(price_high[i-1]<price_high[i]):
+                    sar_high = 2*price_high[i] - price_high[i-1]
+                else:
+                    sar_high = price_high[i-1]
+                sar.append(sar_high)
                 sar_channel_type.append(-1)
                 trend = 0
-                ep = min(price_low[i - n + 1:i + 1])
+                ep = price_low[i]
                 continue
             else:  # 上升通道
                 if price_high[i] > ep:
                     ep = price_high[i]
-                    if af < 0.2:
+                    if (af < 0.2):
                         af = af + step
 
                 new_sar = last_sar + af * (ep - last_sar)
-                ceiling = price_low[i - 1:i + 1]
-                if new_sar > min(ceiling):  # 通道底部不可高于股价
-                    new_sar = min(ceiling)
+
+                ceiling = min(price_low[i-1],price_low[i])
+                if new_sar > ceiling:  # 通道底部不可高于股价
+                    new_sar = ceiling
+
                 sar.append(new_sar)
                 sar_channel_type.append(1)
 
+
         else:  # 下降通道
-            last_sar = sar[i]
+            last_sar = sar[i-1]
             if last_sar < price_high[i]:  # 弹进上升通道
                 af = 0.04
-                sar.append(min(price_low[i - n + 1:i + 1]))
+                if(price_low[i]<price_low[i-1]):
+                    sar_low = 2*price_low[i]-price_low[i-1]
+                else:
+                    sar_low = price_low[i-1]
+                sar.append(sar_low)
                 sar_channel_type.append(1)
                 trend = 1
-                ep = max(price_high[i - n + 1:i + 1])
+                ep = price_high[i]
+
                 continue
             else:
                 if price_low[i] < ep:
                     ep = price_low[i]
-                    if af < 0.2:
+                    if (af < 0.2):
                         af = af + step
 
                 new_sar = last_sar - af * (-ep + last_sar)
-                floor = price_high[i - 1:i + 1]
-                if new_sar < max(floor):  # 下降通道不可低于股价
-                    new_sar = max(floor)
+                floor = min(price_high[i-1],price_high[i])
+                if new_sar < floor:  # 下降通道不可低于股价
+                    new_sar = floor
                 sar.append(new_sar)
                 sar_channel_type.append(-1)
 
-    return sar, sar_channel_type
+
+    return pd.Series(sar,name=None), pd.Series(sar_channel_type,name=None)
+
 
 def draw_sar_point(channel):
     '''
