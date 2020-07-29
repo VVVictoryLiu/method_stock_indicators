@@ -199,3 +199,15 @@ def HisCost(price,pre_price,turn):
         else:
             hiscost.append(hiscost[i-1]*(1-0.01*turn[i])+price[i]*0.01*turn[i])
     return pd.Series(hiscost)
+
+
+def ROC(series,N=6,M=12):
+    '''
+    ROC与MAROC指标计算，N为滞后天数，默认为6；M为移动平均天数，默认12
+    '''
+    temp = pd.DataFrame({'ori_series':series,'BX':series.shift(N)})
+    temp['AX'] = temp['ori_series'] - temp['BX']
+    temp['ROC'] = temp['AX']/temp['BX']
+    temp['MAROC'] = MA(temp['ROC'],M)
+    
+    return temp['ROC'],temp['MAROC']
