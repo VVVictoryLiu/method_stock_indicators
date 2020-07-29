@@ -24,3 +24,7 @@ n日布林线
 
 ### HisCost(price,pre_price,turn)
 基于换手率和价格的成本估算
+
+### ROC(Series,N,M)
+
+ROC和MAROC指标的计算
