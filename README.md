@@ -28,3 +28,7 @@ n日布林线
 ### ROC(Series,N,M)
 
 ROC和MAROC指标的计算
+
+### CCI(high,low,close,N)
+
+CCI指标的计算
