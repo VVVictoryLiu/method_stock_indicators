@@ -211,3 +211,14 @@ def ROC(series,N=6,M=12):
     temp['MAROC'] = MA(temp['ROC'],M)
     
     return temp['ROC'],temp['MAROC']
+    
+    
+def CCI(high,low,close,N=13):
+    '''
+    计算CCI指标
+    '''
+    tp = (high+low+close) / 3
+    ma = MA(close,N)
+    md = MA(ma-close,N)
+    cci = (tp-ma) / md / 0.015
+    return cci
