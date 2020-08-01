@@ -32,3 +32,7 @@ ROC和MAROC指标的计算
 ### CCI(high,low,close,N)
 
 CCI指标的计算
+
+### MTM(Series,N,M)
+
+返回MTM和MTMMA指标
