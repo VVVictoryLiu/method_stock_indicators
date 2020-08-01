@@ -222,3 +222,9 @@ def CCI(high,low,close,N=13):
     md = MA(ma-close,N)
     cci = (tp-ma) / md / 0.015
     return cci
+
+def MTM(series,N,M):
+    temp = pd.DataFrame({'ori_series':series,'moving_series':series.shift(N)})
+    temp['MTM'] = temp['ori_series'] - temp['moving_series']
+    temp['MTMMA'] = MA(temp['MTM'],M)
+    return temp['MTM'],temp['MTMMA']
