@@ -36,3 +36,7 @@ CCI指标的计算
 ### MTM(Series,N,M)
 
 返回MTM和MTMMA指标
+
+### WR(close,high,low,N)
+
+返回N日威廉指标
