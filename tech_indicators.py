@@ -228,3 +228,14 @@ def MTM(series,N,M):
     temp['MTM'] = temp['ori_series'] - temp['moving_series']
     temp['MTMMA'] = MA(temp['MTM'],M)
     return temp['MTM'],temp['MTMMA']
+
+def WR(close,high,low,N):
+    assert len(close)== len(high)
+    assert len(close)== len(low)
+    wr = []
+    wr.extend([np.nan for _ in range(N-1)])
+    for i in range(N,len(close)):
+        high_in_high = max(high[i-N:i])
+        low_in_low = min(low[i-N:i])
+        wr.append((high_in_high-close[i-1])/(high_in_high-low_in_low))
+    return wr
