@@ -40,3 +40,7 @@ CCI指标的计算
 ### WR(close,high,low,N)
 
 返回N日威廉指标
+
+### PSY(close,preclose,N)
+
+返回N日PSY指标
