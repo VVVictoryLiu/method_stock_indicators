@@ -44,3 +44,11 @@ CCI指标的计算
 ### PSY(close,preclose,N)
 
 返回N日PSY指标
+
+### BS_option(S, K, T, r, sigma, option='call')
+
+基于bs公式的期权价格
+
+### BS_option_withQ(S, K, T,t, r,q, sigma, option='call')
+
+带有股息的期权价格
