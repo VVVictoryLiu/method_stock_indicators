@@ -51,23 +51,27 @@ def MA(series,days):
     '''
     n日简单移动平均
     '''
+    
     dict={}
     dict[0] = series
     for day in range(1,days):
         dict[day] = series.shift(day)
     temp = pd.DataFrame(dict)
     temp = pd.DataFrame(temp.mean(skipna=False, axis=1),columns=['MA'])
+    
     return temp['MA']
 
 def EMA(series,n):
     '''
     n日指数移动平均，由于需要用到历史移动平均值，故该值将逐步回归真实值
     '''
+    
     ema = series[0]
     EMA = []
     for i in series:
         ema = (2*i + (n-1)*ema)/(n+1)
         EMA.append(ema)
+        
     return pd.Series(EMA)
 
 
@@ -75,9 +79,11 @@ def MACD(series):
     '''
     MACD值
     '''
+    
     quick_line = EMA(series, 12)
     slow_line = EMA(series, 26)
     DIF = quick_line - slow_line
+    
     DEA = EMA(DIF, 9)
     macd = 2 * (DIF - DEA)
 
@@ -87,6 +93,7 @@ def macd_trigger(series):
     '''
     基于MACD值构建的买卖信号
     '''
+    
     def gen_flag(dataframe):
         muti = dataframe['pre_macd'] * dataframe['macd']
         if muti <0:
@@ -100,6 +107,7 @@ def macd_trigger(series):
     pre_macd = series.shift(1)
     data = pd.DataFrame({'pre_macd':pre_macd,'macd':series})
     data['macd_trigger'] = data.apply(gen_flag,axis=1)
+    
     return data['macd_trigger']
 
 
@@ -168,6 +176,7 @@ def SAR(price_high, price_low, price_close, n=4, af=0.04, step=0.04, extrme=0.2)
 
 
         else:  # 下降通道
+            
             last_sar = sar[i-1]
             if last_sar < price_high[i]:  # 弹进上升通道
                 af = 0.04
@@ -193,6 +202,7 @@ def SAR(price_high, price_low, price_close, n=4, af=0.04, step=0.04, extrme=0.2)
                     new_sar = floor
                 sar.append(new_sar)
                 sar_channel_type.append(-1)
+                
 
 
     return pd.Series(sar,name=None), pd.Series(sar_channel_type,name=None)
@@ -212,10 +222,13 @@ def draw_sar_point(channel):
                 return 'buy'
         else:
             return 'waitting'
+        
     channel_tom = channel.shift(-1)
     sign_num = channel_tom * channel
+    
     temp = pd.DataFrame({'channel_tom':channel_tom,'sign_num':sign_num,'channel':channel})
     sign = temp.apply(generate_sign,axis=1)
+    
     return sign
 
 def boll(series,n):
@@ -285,45 +298,4 @@ def WR(close,high,low,N):
         wr.append((high_in_high-close[i-1])/(high_in_high-low_in_low))
     return wr
 
-def BS_option(S, K, T, r, sigma, option='call'):
-    """
-    S: spot price
-    K: strike price
-    T: time to maturity
-    r: risk-free interest rate
-    sigma: standard deviation of price of underlying asset
-    """
-    d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T)/(sigma*np.sqrt(T))
-    d2 = (np.log(S/K) + (r - 0.5*sigma**2)*T)/(sigma * np.sqrt(T))
 
-    if option == 'call':
-        return (S*norm.cdf(d1, 0.0, 1.0) - K*np.exp(-r*T)*norm.cdf(d2, 0.0, 1.0))
-    elif option == 'put':
-        return (K*np.exp(-r*T)*norm.cdf(-d2, 0.0, 1.0) - S*norm.cdf(-d1, 0.0, 1.0))
-    else:
-        return 'Error for input'
-    
-    
-def BS_option_withQ(S, K, T,t, r,q, sigma, option='call'):
-    """
-    
-    Calculate Option Price with repo rate
-    
-    S: spot price
-    K: strike price
-    T,t: time to maturity
-    r: risk-free interest rate
-    q: repo rate 
-    sigma: standard deviation of price of underlying asset
-    """
-    T = T-t
-    
-    d1 = (np.log(S/K) + (r -q + 0.5*sigma**2)*T)/(sigma*np.sqrt(T))
-    d2 = (np.log(S/K) + (r -q - 0.5*sigma**2)*T)/(sigma * np.sqrt(T))
-
-    if option == 'call':
-        return (S*np.exp(-q*T)*norm.cdf(d1, 0.0, 1.0) - K*np.exp(-r*T)*norm.cdf(d2, 0.0, 1.0))
-    elif option == 'put':
-        return (K*np.exp(-r*T)*norm.cdf(-d2, 0.0, 1.0) - S*np.exp(-q*T)*norm.cdf(-d1, 0.0, 1.0))
-    else:
-        return 'Error for input'
